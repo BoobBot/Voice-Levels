@@ -162,7 +162,10 @@ async def add_exp_to_member(member):
     if not user:
         await new_user(member)
         user = await get_user(member)
-    user["exp"] += randrange(1, 6)
+    exp = randrange(3, 6)
+    if len([x for x in member.voice.channel.members if not x.bot]) == 1:
+        exp = 1
+    user["exp"] += exp
     current_level = get_level(user["exp"])
     if current_level > user['level']:
         user['level'] = current_level
@@ -185,7 +188,7 @@ async def add_to_handles(member):
     # Remove previous handle
     if member_id in bot.handles[guild_id]:
         bot.handles[guild_id].pop(member_id)
-    rng_time = randrange(30, 60)
+    rng_time = randrange(40, 45)
     handle = bot.loop.call_later(rng_time, bot.loop.create_task, add_exp_to_member(member))
     bot.handles[guild_id][member_id] = handle
 
