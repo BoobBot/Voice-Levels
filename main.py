@@ -81,6 +81,15 @@ async def on_guild_join(guild):
 #                               FUNCTIONS
 #################################################################################
 
+def get_level(xp):
+    rank_constant = 0.1
+    sqrt = math.sqrt(xp)
+    return math.floor(rank_constant * sqrt)
+
+
+def get_remaining_xp(xp, level):
+    return pow(level * 10, 2) - xp
+
 
 async def new_user(member):
     await r.table('users').insert({"exp": 0, "level": 0, "id": str(member.id)}, conflict="update").run(
@@ -98,7 +107,7 @@ async def add_exp_to_member(member):
         await new_user(member)
         user = await r.table('users').get(str(member.id)).run(bot.conn)
     user["exp"] += randrange(1, 6)
-    current_level = math.floor(0.1 * math.sqrt(user["exp"]))
+    current_level = get_level(user["exp"])
     if current_level > user['level']:
         user['level'] = current_level
         print(str(member) + "RANKED UP")
@@ -132,11 +141,12 @@ async def add_to_handles(member):
 async def profile(ctx, member: discord.Member = None):
     if not member:
         member = ctx.author
-    user = await r.table('users').get(str(member)).run(bot.conn)
+    user = await r.table('users').get(str(member.id)).run(bot.conn)
     if not user:
         await new_user(member)
-        user = await r.table('users').get(str(ctx.author.id)).run(bot.conn)
-    await ctx.send(user)
+        user = await r.table('users').get(str(member.id)).run(bot.conn)
+    await ctx.send(
+        f"User: {str(member)}\nLevel: {user['level']}\nExp: {user['exp']}/{get_remaining_xp(user['exp'], user['level'])}")
 
 
 bot.run(bot.config["TOKEN"])
