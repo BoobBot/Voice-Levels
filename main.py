@@ -115,7 +115,8 @@ async def new_user(member):
 
 async def save_user(user_dict, guild_id):
     guild = await get_guild(guild_id)
-    guild['users'].append([user_dict['id']])
+    user = guild['users'].get(user_dict['id'], user_dict['id'])
+    pprint(user)
     guild['users'][user_dict['id']] = user_dict
     await save_guild(guild)
 
