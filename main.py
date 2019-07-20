@@ -1,3 +1,5 @@
+from pprint import pprint
+
 import discord
 import yaml
 from discord.ext import commands
@@ -109,7 +111,7 @@ async def new_user(member):
     guild = member.guild
     guild_id = str(guild.id)
     guild = await get_guild(guild_id)
-    guild['users'][str(member.id)] = {"exp": 0, "level": 0, "id": str(member.id)}
+    guild['users'][str(member.id)] = {"exp": 0, "level": 0, "name": str(member)}
     await save_guild(guild)
 
 
@@ -123,7 +125,7 @@ async def get_user(member):
     guild = await get_guild(member.guild.id)
     if not guild:
         await new_guild(str(member.guild.id))
-    print(guild)
+    pprint(guild)
     if str(member.id) in guild["users"]:
         return guild["users"][str(member.id)]
 
