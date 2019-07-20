@@ -101,7 +101,7 @@ async def add_exp_to_member(member):
     current_level = math.floor(0.1 * math.sqrt(user["exp"]))
     if current_level > user['level']:
         user['level'] = current_level
-        print(member + "RANKED UP")
+        print(str(member) + "RANKED UP")
     await r.table('users').insert(user, conflict="update").run(bot.conn)
     print(user)
     print(f"Would be updating exp for {member}")
