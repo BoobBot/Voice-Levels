@@ -81,23 +81,28 @@ async def on_guild_join(guild):
 #                               DATABASE FUNCTIONS
 #################################################################################
 async def new_guild(guild_id):
-        await r.table("guilds").insert({
-            "id": str(guild_id),
-            "announce": {
-                "enabled": False,
-                "whisper": False,
-                "message": "%USER% is now voice level: %LEVEL%!"
-            },
-            "rewards": {
-                "keep_old": True,
-                "roles": {}
-            },
-            "users": {}
-        }, conflict="update").run(bot.conn)
+    await r.table("guilds").insert({
+        "id": str(guild_id),
+        "announce": {
+            "enabled": False,
+            "whisper": False,
+            "channel_id": None,
+            "message": "%USER% is now voice level: %LEVEL%!"
+        },
+        "rewards": {
+            "keep_old": True,
+            "roles": {}
+        },
+        "users": {}
+    }, conflict="update").run(bot.conn)
 
 
 async def get_guild(guild_id):
     return r.table("guilds").get(str(guild_id)).run(bot.conn)
+
+
+async def save_guild(guild_dict, guild_id):
+    await r.table('guilds').insert(guild_dict, conflict="update").run(bot.conn)
 
 
 async def new_user(member):
