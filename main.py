@@ -121,6 +121,8 @@ async def save_user(user_dict, guild_id):
 
 async def get_user(member):
     guild = await get_guild(member.guild.id)
+    if not guild:
+        await new_guild(str(member.guild.id))
     print(guild)
     if str(member.id) in guild["users"]:
         return guild["users"][str(member.id)]
