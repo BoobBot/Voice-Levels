@@ -81,6 +81,13 @@ async def on_guild_join(guild):
 #                               FUNCTIONS
 #################################################################################
 
+def check_voice_status(member):
+    voice = member.voice
+    if not voice:
+        return False
+    return voice.mute or voice.self_mute or voice.deaf or voice.self_deaf or voice.afk
+
+
 def get_level(xp):
     rank_constant = 0.1
     sqrt = math.sqrt(xp)
@@ -92,13 +99,12 @@ def get_xp_from_level(level):
 
 
 async def new_user(member):
-    await r.table('users').insert({"exp": 0, "level": 0, "id": str(member.id)}, conflict="update").run(
-        bot.conn)
+    await r.table('users').insert({"exp": 0, "level": 0, "id": str(member.id)}, conflict="update").run(bot.conn)
 
 
 async def add_exp_to_member(member):
     # add back to loop
-    if member.voice and not member.voice.mute:
+    if check_voice_status(member):
         if member.voice.channel and member.voice.channel is not member.guild.afk_channel:
             await add_to_handles(member)
     # do stuff here
@@ -139,8 +145,7 @@ async def add_to_handles(member):
 
 @bot.command()
 async def profile(ctx, member: discord.Member = None):
-    if not member:
-        member = ctx.author
+    member = member if member else ctx.author
     user = await r.table('users').get(str(member.id)).run(bot.conn)
     if not user:
         await new_user(member)
