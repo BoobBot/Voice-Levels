@@ -87,8 +87,8 @@ def get_level(xp):
     return math.floor(rank_constant * sqrt)
 
 
-def get_remaining_xp(xp, level):
-    return pow(level * 10, 2) - xp
+def get_xp_from_level(xp, level):
+    return pow(level+1 * 10, 2)
 
 
 async def new_user(member):
@@ -146,7 +146,7 @@ async def profile(ctx, member: discord.Member = None):
         await new_user(member)
         user = await r.table('users').get(str(member.id)).run(bot.conn)
     await ctx.send(
-        f"User: {str(member)}\nLevel: {user['level']}\nExp: {user['exp']}/{get_remaining_xp(user['exp'], user['level'])}")
+        f"User: {str(member)}\nLevel: {user['level']}\nExp: {user['exp']}/{get_xp_from_level(user['exp'], user['level'])}")
 
 
 bot.run(bot.config["TOKEN"])
