@@ -1,3 +1,4 @@
+import discord
 import yaml
 from discord.ext import commands
 import rethinkdb as r
@@ -128,13 +129,13 @@ async def add_to_handles(member):
 #################################################################################
 
 @bot.command()
-async def profile(ctx):
-    user = await r.table('users').get(str(ctx.author.id)).run(bot.conn)
+async def profile(ctx, member: discord.Member = None):
+    if not member:
+        member = ctx.author
+    user = await r.table('users').get(str(member)).run(bot.conn)
     if not user:
-        await r.table('users').insert({"exp": 0, "level": 0, "id": str(ctx.author.id)}, conflict="update").run(
-            bot.conn)
+        await new_user(member)
         user = await r.table('users').get(str(ctx.author.id)).run(bot.conn)
-
     await ctx.send(user)
 
 
