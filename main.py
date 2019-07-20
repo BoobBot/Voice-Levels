@@ -46,8 +46,7 @@ async def on_ready():
             for member in [x for x in voice_channel.members if not x.bot]:
                 user = await r.table('users').get(str(member.id)).run(bot.conn)
                 if not user:
-                    await r.table('users').insert({"exp": 0, "level": 0, "id": str(member.id)}, conflict="update").run(
-                        bot.conn)
+                    await new_user(member)
                 await add_to_handles(member)
 
 
@@ -82,6 +81,11 @@ async def on_guild_join(guild):
 #################################################################################
 
 
+async def new_user(member):
+    await r.table('users').insert({"exp": 0, "level": 0, "id": str(member.id)}, conflict="update").run(
+        bot.conn)
+
+
 async def add_exp_to_member(member):
     # add back to loop
     if member.voice:
@@ -90,8 +94,7 @@ async def add_exp_to_member(member):
     # do stuff here
     user = await r.table('users').get(str(member.id)).run(bot.conn)
     if not user:
-        await r.table('users').insert({"exp": 0, "level": 0, "id": str(member.id)}, conflict="update").run(
-            bot.conn)
+        await new_user(member)
         user = await r.table('users').get(str(member.id)).run(bot.conn)
     user["exp"] += randrange(1, 6)
     current_level = math.floor(0.1 * math.sqrt(user["exp"]))
