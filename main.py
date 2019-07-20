@@ -106,7 +106,7 @@ async def new_user(member):
     await r.table('users').insert({"exp": 0, "level": 0, "id": str(member.id)}, conflict="update").run(bot.conn)
 
 
-async def save_user(user_dict, Guild_id):
+async def save_user(user_dict, guild_id):
     await r.table('users').insert(user_dict, conflict="update").run(bot.conn)
 
 
