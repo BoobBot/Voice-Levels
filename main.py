@@ -77,8 +77,9 @@ async def on_guild_join(guild):
 
 async def add_exp_to_member(member):
     # add back to loop
-    if member.voice.channel and member.voice.channel is not member.guild.afk_channel:
-        await add_to_handles(member)
+    if member.voice:
+        if member.voice.channel and member.voice.channel is not member.guild.afk_channel:
+            await add_to_handles(member)
     # do stuff here
     print(f"Would be updating exp for {member}")
 
