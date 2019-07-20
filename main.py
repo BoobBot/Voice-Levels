@@ -1,21 +1,21 @@
 import sys
 from pprint import pprint
+from random import randrange
 
 import discord
+import math
+import rethinkdb as r
 import yaml
 from discord.ext import commands
-import rethinkdb as r
-import math
-from random import randrange
 
 with open("config.yml") as config:
     config = yaml.safe_load(config)
 
 description = "Just a bot that grants members exp for being in a voice channel"
-bot = commands.AutoShardedBot(command_prefix="vl!", case_insensitive=True, description=description,fetch_offline_members = False)
+bot = commands.AutoShardedBot(command_prefix="vl!", case_insensitive=True, description=description,
+                              fetch_offline_members=False)
 bot.config = config
 bot.handles = {}
-
 
 
 #################################################################################
@@ -149,7 +149,7 @@ def get_level(xp):
 
 
 def get_xp_from_level(level):
-    return pow(level + 1 * 10, 2)
+    return pow((level + 1) * 10, 2)
 
 
 async def add_exp_to_member(member):
@@ -233,7 +233,7 @@ async def profile(ctx, member: discord.Member = None):
 @bot.command()
 async def levels(ctx):
     lol = await r.table('guilds').get(str(ctx.guild.id)).get_field("users").run(bot.conn)
-    #pprint(lol)
+    # pprint(lol)
     t = []
     for k, v in lol.items():
         t.append(v)
@@ -257,6 +257,7 @@ async def levels(ctx):
     # em.add_field(name="Global leaderboard", value=msg)
     # em.set_footer(text="Requested by {}".format(str(ctx.message.author)))
     # await ctx.channel.send(embed=em)
+
 
 if __name__ == "__main__":
     check_db()
