@@ -98,7 +98,7 @@ async def new_guild(guild_id):
 
 
 async def get_guild(guild_id):
-    return r.table("guilds").get(str(guild_id)).run(bot.conn)
+    return await r.table("guilds").get(str(guild_id)).run(bot.conn)
 
 
 async def save_guild(guild_dict):
@@ -121,7 +121,9 @@ async def save_user(user_dict, guild_id):
 
 async def get_user(member):
     guild = await get_guild(member.guild.id)
-    return guild["users"][str(member.id)]
+    print(guild)
+    if str(member.id) in guild["users"]:
+        return guild["users"][str(member.id)]
 
 
 #################################################################################
@@ -144,7 +146,7 @@ def get_level(xp):
 
 
 def get_xp_from_level(level):
-    return pow(level+1 * 10, 2)
+    return pow(level + 1 * 10, 2)
 
 
 async def add_exp_to_member(member):
