@@ -243,20 +243,12 @@ async def levels(ctx):
         c += 1
         msg += f"```#{c} User: {v['name']}\nLevel: {v['level']}\nExp:{v['exp']}```\n"
         if c == 5:
-            return await ctx.send(msg)
-
-    # msg = ""
-    # for value in lol:
-    #     lvl = self._get_level_from_xp(value['xp'])
-    #     msg += f"**Name**: {value['name']}\n**Level**: {lvl}\n**Total experience**: {value['xp']}\n\n"
-    # if isinstance(ctx.message.channel, discord.abc.PrivateChannel):
-    #     em = discord.Embed(color=0x80f5ff)
-    # else:
-    #     em = discord.Embed(color=await ctx.guildcolor(str(ctx.guild.id)))
-    # em.set_author(icon_url=self.bot.user.avatar_url, name="Leaderboard  for " + self.bot.user.name)
-    # em.add_field(name="Global leaderboard", value=msg)
-    # em.set_footer(text="Requested by {}".format(str(ctx.message.author)))
-    # await ctx.channel.send(embed=em)
+            break
+    em = discord.Embed(color=await ctx.guildcolor(str(ctx.guild.id)))
+    em.set_author(icon_url=bot.user.avatar_url, name="Leaderboard  for " + bot.user.name)
+    em.add_field(name="Global leaderboard", value=msg)
+    em.set_footer(text="Requested by {}".format(str(ctx.message.author)))
+    await ctx.send(embed=em)
 
 
 if __name__ == "__main__":
