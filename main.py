@@ -77,16 +77,6 @@ async def on_guild_join(guild):
         }, conflict="update").run(bot.conn)
 
 
-@bot.command()
-async def profile(ctx):
-    user = await r.table('users').get(str(ctx.author.id)).run(bot.conn)
-    if not user:
-        await r.table('users').insert({"exp": 0, "level": 0, "id": str(ctx.author.id)}, conflict="update").run(
-            bot.conn)
-        user = await r.table('users').get(str(ctx.author.id)).run(bot.conn)
-
-    await ctx.send(user)
-
 #################################################################################
 #                               FUNCTIONS
 #################################################################################
@@ -134,5 +124,14 @@ async def add_to_handles(member):
 #                               COMMANDS
 #################################################################################
 
+@bot.command()
+async def profile(ctx):
+    user = await r.table('users').get(str(ctx.author.id)).run(bot.conn)
+    if not user:
+        await r.table('users').insert({"exp": 0, "level": 0, "id": str(ctx.author.id)}, conflict="update").run(
+            bot.conn)
+        user = await r.table('users').get(str(ctx.author.id)).run(bot.conn)
+
+    await ctx.send(user)
 
 bot.run(bot.config["TOKEN"])
