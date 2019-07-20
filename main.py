@@ -107,11 +107,9 @@ async def on_guild_join(guild):
 #################################################################################
 
 async def add_exp_to_member(member):
-    guild = member.guild
-    guild_id = str(guild.id)
-    member_id = str(member.id)
-    handle = bot.loop.call_later(1, bot.loop.create_task, add_exp_to_member(member))
-    bot.handles[guild_id][member_id] = handle
+    # add back to loop
+    await add_to_handles(member)
+    # do stuff here
     print(f"Would be updating exp for {member}")
 
 
