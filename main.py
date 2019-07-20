@@ -116,7 +116,8 @@ async def save_user(user_dict, guild_id):
 
 
 async def get_user(member):
-    return await r.table('users').get(str(member.id)).run(bot.conn)
+    guild = await get_guild(member.guild.id)
+    return guild["users"][str(member.id)]
 
 
 #################################################################################
