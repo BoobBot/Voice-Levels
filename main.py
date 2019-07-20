@@ -85,7 +85,9 @@ def check_voice_status(member):
     voice = member.voice
     if not voice:
         return False
-    return voice.mute or voice.self_mute or voice.deaf or voice.self_deaf or voice.afk
+    if voice.mute or voice.self_mute or voice.deaf or voice.self_deaf or voice.afk:
+        return False
+    return True
 
 
 def get_level(xp):
@@ -105,8 +107,7 @@ async def new_user(member):
 async def add_exp_to_member(member):
     # add back to loop
     if check_voice_status(member):
-        if member.voice.channel and member.voice.channel is not member.guild.afk_channel:
-            await add_to_handles(member)
+        await add_to_handles(member)
     # do stuff here
     user = await r.table('users').get(str(member.id)).run(bot.conn)
     if not user:
