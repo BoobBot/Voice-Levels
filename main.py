@@ -76,14 +76,19 @@ async def on_guild_join(guild):
         }, conflict="update").run(bot.conn)
 
 
+@bot.command()
+async def profile(ctx):
+    user = await r.table('users').get(str(ctx.author.id)).run(bot.conn)
+    if not user:
+        await r.table('users').insert({"exp": 0, "level": 0, "id": str(ctx.author.id)}, conflict="update").run(
+            bot.conn)
+        user = await r.table('users').get(str(ctx.author.id)).run(bot.conn)
+
+    await ctx.send(user)
+
 #################################################################################
 #                               FUNCTIONS
 #################################################################################
-
-def get_lvl(xp):
-    rank_cont = 0.1
-    level = math.floor(rank_cont * math.sqrt(xp))
-    return level
 
 
 async def add_exp_to_member(member):
