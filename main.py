@@ -5,7 +5,6 @@ import rethinkdb as r
 with open("config.yml") as config:
     config = yaml.safe_load(config)
 
-
 description = "Just a bot that grants members exp for being in a voice channel"
 bot = commands.AutoShardedBot(command_prefix="vl!", case_insensitive=True, description=description)
 bot.config = config
@@ -72,43 +71,14 @@ async def on_guild_join(guild):
         }, conflict="update").run(bot.conn)
 
 
-# @bot.event
-# async def on_voice_state_update(member, before, after):
-#     print(bot.handles)
-#     guild = member.guild
-#     guild_id = str(guild.id)
-#     member_id = str(member.id)
-#
-#     # Returns on mute/deafen
-#     if before.channel == after.channel or member.bot:
-#         return
-#
-#     # Add guild to handles
-#     if guild_id not in bot.handles:
-#         bot.handles[guild_id] = {}
-#
-#     # AFK channel checks
-#     if not guild.afk_channel or after.channel == guild.afk_channel:
-#         if member_id in bot.handles[guild_id]:
-#             bot.handles[guild_id][member_id].cancel()
-#         return
-#
-#     # Cancel if they leave VC
-#     if not after.channel:
-#         if bot.handles[guild_id][member_id]:
-#             bot.handles[guild_id][member_id].cancel()
-#
-#     handle = bot.loop.call_later(60, bot.loop.create_task, await add_exp_to_member(member))
-#     bot.handles[guild_id][member_id] = handle
-
-
 #################################################################################
 #                               FUNCTIONS
 #################################################################################
 
 async def add_exp_to_member(member):
     # add back to loop
-    await add_to_handles(member)
+    if member.voice.channel and member.voice.channel is not member.guild.afk_channel:
+        await add_to_handles(member)
     # do stuff here
     print(f"Would be updating exp for {member}")
 
@@ -126,10 +96,11 @@ async def add_to_handles(member):
     if member_id in bot.handles[guild_id]:
         bot.handles[guild_id].pop(member_id)
 
-    #coro = await add_exp_to_member(member)
+    # coro = await add_exp_to_member(member)
     print("this?")
     handle = bot.loop.call_later(1, bot.loop.create_task, add_exp_to_member(member))
     bot.handles[guild_id][member_id] = handle
+
 
 #################################################################################
 #                               COMMANDS
