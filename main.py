@@ -101,18 +101,22 @@ async def get_guild(guild_id):
     return r.table("guilds").get(str(guild_id)).run(bot.conn)
 
 
-async def save_guild(guild_dict, guild_id):
+async def save_guild(guild_dict):
     await r.table('guilds').insert(guild_dict, conflict="update").run(bot.conn)
 
 
 async def new_user(member):
     guild = member.guild
     guild_id = str(guild.id)
-    await r.table('users').insert({"exp": 0, "level": 0, "id": str(member.id)}, conflict="update").run(bot.conn)
+    guild = await get_guild(guild_id)
+    guild['users'][str(member.id)] = {"exp": 0, "level": 0, "id": str(member.id)}
+    await save_guild(guild)
 
 
 async def save_user(user_dict, guild_id):
-    await r.table('users').insert(user_dict, conflict="update").run(bot.conn)
+    guild = await get_guild(guild_id)
+    guild['users'][user_dict['id']] = user_dict
+    await save_guild(guild)
 
 
 async def get_user(member):
