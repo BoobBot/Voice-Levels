@@ -80,6 +80,16 @@ async def on_guild_join(guild):
 #################################################################################
 #                               DATABASE FUNCTIONS
 #################################################################################
+
+
+async def check_role(member, level):
+    roles = await get_roles(member.guild.id)
+    pprint(roles)
+    for r in roles:
+        pprint(r)
+    return
+
+
 async def new_guild(guild_id):
     await r.table("guilds").insert({
         "id": str(guild_id),
@@ -95,6 +105,10 @@ async def new_guild(guild_id):
         },
         "users": {}
     }, conflict="update").run(bot.conn)
+
+
+async def get_roles(guild_id):
+    return await r.table("guilds").get(str(guild_id)).get_field("rewards").get_field("roles").run(bot.conn)
 
 
 async def get_guild(guild_id):
@@ -116,7 +130,6 @@ async def new_user(member):
 async def save_user(user_dict, guild_id):
     guild = await get_guild(guild_id)
     user = guild['users'].get(user_dict['id'], user_dict['id'])
-    pprint(user)
     guild['users'][user_dict['id']] = user_dict
     await save_guild(guild)
 
@@ -173,8 +186,9 @@ async def add_exp_to_member(member):
     user["name"] = str(member)
     user["id"] = str(member.id)
     await save_user(user, member.guild.id)
-    print(f"updating exp for {member}")
-    print(user)
+    # print(f"updating exp for {member}")
+    # print(user)
+    await check_role(member, current_level)
 
 
 async def add_to_handles(member):
@@ -189,7 +203,7 @@ async def add_to_handles(member):
     # Remove previous handle
     if member_id in bot.handles[guild_id]:
         bot.handles[guild_id].pop(member_id)
-    rng_time = randrange(40, 45)
+    rng_time = 5# randrange(40, 45)
     handle = bot.loop.call_later(rng_time, bot.loop.create_task, add_exp_to_member(member))
     bot.handles[guild_id][member_id] = handle
 
@@ -198,13 +212,13 @@ def check_db():
     try:
         con = r.connect()
         try:
-            d = r.db_create("VL").run(con)
+            d = r.db_create("VLLL").run(con)
             print(d)
         except r.ReqlRuntimeError:
             pass
         for t in ["guilds"]:
             try:
-                t = r.db("VL").table_create(t).run(con)
+                t = r.db("VLLL").table_create(t).run(con)
                 print(t)
             except r.ReqlOpFailedError:
                 continue
@@ -228,7 +242,10 @@ async def profile(ctx, member: discord.Member = None):
         user = await get_user(member)
     em = discord.Embed()
     em.set_author(icon_url=member.avatar_url, name="Profile for " + member.name)
-    em.add_field(name="​", value=f"User: {str(member)}\nLevel: {user['level']}\nExp: {user['exp']}/{get_xp_from_level(user['level'])}")
+    em.add_field(name="​",
+                 value=f"User: {str(member)}"
+                 f"\nLevel: {user['level']}"
+                 f"\nExp: {user['exp']}/{get_xp_from_level(user['level'])}")
     em.set_footer(text="Requested by {}".format(str(ctx.message.author)))
     await ctx.send(embed=em)
 
@@ -260,5 +277,5 @@ async def levels(ctx):
 if __name__ == "__main__":
     check_db()
     r.set_loop_type("asyncio")
-    bot.conn = bot.loop.run_until_complete(r.connect(db="VL"))
+    bot.conn = bot.loop.run_until_complete(r.connect(db="VLLL"))
     bot.run(bot.config["TOKEN"])
