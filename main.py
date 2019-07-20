@@ -2,6 +2,7 @@ import yaml
 from discord.ext import commands
 import rethinkdb as r
 import math
+from random import randrange
 
 with open("config.yml") as config:
     config = yaml.safe_load(config)
@@ -102,7 +103,7 @@ async def add_exp_to_member(member):
         await r.table('users').insert({"exp": 0, "level": 0, "id": str(member.id)}, conflict="update").run(
             bot.conn)
         user = await r.table('users').get(str(member.id)).run(bot.conn)
-    user["exp"] += 1
+    user["exp"] += randrange(1, 6)
     current_level = math.floor(0.1 * math.sqrt(user["exp"]))
     if current_level > user['level']:
         user['level'] = current_level
@@ -124,8 +125,8 @@ async def add_to_handles(member):
     # Remove previous handle
     if member_id in bot.handles[guild_id]:
         bot.handles[guild_id].pop(member_id)
-
-    handle = bot.loop.call_later(1, bot.loop.create_task, add_exp_to_member(member))
+    rng_time = randrange(30, 60)
+    handle = bot.loop.call_later(rng_time, bot.loop.create_task, add_exp_to_member(member))
     bot.handles[guild_id][member_id] = handle
 
 
