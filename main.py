@@ -1,3 +1,4 @@
+import sys
 from pprint import pprint
 
 import discord
@@ -15,9 +16,6 @@ bot = commands.AutoShardedBot(command_prefix="vl!", case_insensitive=True, descr
 bot.config = config
 bot.handles = {}
 
-database = bot.config["DATABASE"]
-r.set_loop_type("asyncio")
-bot.conn = bot.loop.run_until_complete(r.connect(db="test"))
 
 
 #################################################################################
@@ -125,7 +123,6 @@ async def get_user(member):
     guild = await get_guild(member.guild.id)
     if not guild:
         await new_guild(str(member.guild.id))
-    pprint(guild)
     if str(member.id) in guild["users"]:
         return guild["users"][str(member.id)]
 
@@ -193,9 +190,30 @@ async def add_to_handles(member):
     bot.handles[guild_id][member_id] = handle
 
 
+def check_db():
+    try:
+        con = r.connect()
+        try:
+            d = r.db_create("VL").run(con)
+            print(d)
+        except r.ReqlRuntimeError:
+            pass
+        for t in ["guilds"]:
+            try:
+                t = r.db("VL").table_create(t).run(con)
+                print(t)
+            except r.ReqlOpFailedError:
+                continue
+        con.close()
+    except r.RqlDriverError as e:
+        print(f"{e}\n\rRethinkDb running?\nexiting...")
+        sys.exit()
+
+
 #################################################################################
 #                               COMMANDS
 #################################################################################
+
 
 @bot.command()
 async def profile(ctx, member: discord.Member = None):
@@ -208,4 +226,25 @@ async def profile(ctx, member: discord.Member = None):
         f"User: {str(member)}\nLevel: {user['level']}\nExp: {user['exp']}/{get_xp_from_level(user['level'])}")
 
 
-bot.run(bot.config["TOKEN"])
+@bot.command()
+async def levels(ctx):
+    lol = await r.table('guilds').run(bot.conn)
+    print(lol)
+    # msg = ""
+    # for value in lol:
+    #     lvl = self._get_level_from_xp(value['xp'])
+    #     msg += f"**Name**: {value['name']}\n**Level**: {lvl}\n**Total experience**: {value['xp']}\n\n"
+    # if isinstance(ctx.message.channel, discord.abc.PrivateChannel):
+    #     em = discord.Embed(color=0x80f5ff)
+    # else:
+    #     em = discord.Embed(color=await ctx.guildcolor(str(ctx.guild.id)))
+    # em.set_author(icon_url=self.bot.user.avatar_url, name="Leaderboard  for " + self.bot.user.name)
+    # em.add_field(name="Global leaderboard", value=msg)
+    # em.set_footer(text="Requested by {}".format(str(ctx.message.author)))
+    # await ctx.channel.send(embed=em)
+
+if __name__ == "__main__":
+    check_db()
+    r.set_loop_type("asyncio")
+    bot.conn = bot.loop.run_until_complete(r.connect(db="VL"))
+    bot.run(bot.config["TOKEN"])
