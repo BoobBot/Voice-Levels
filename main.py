@@ -13,7 +13,7 @@ bot.handles = {}
 
 database = bot.config["DATABASE"]
 r.set_loop_type("asyncio")
-bot.conn = bot.loop.run_until_complete(r.connect(host="localhost", port=database["PORT"], db=database["DATABASE"]))
+bot.conn = bot.loop.run_until_complete(r.connect(db="test"))
 
 
 #################################################################################
@@ -107,6 +107,11 @@ async def on_guild_join(guild):
 #################################################################################
 
 async def add_exp_to_member(member):
+    guild = member.guild
+    guild_id = str(guild.id)
+    member_id = str(member.id)
+    handle = bot.loop.call_later(1, bot.loop.create_task, add_exp_to_member(member))
+    bot.handles[guild_id][member_id] = handle
     print(f"Would be updating exp for {member}")
 
 
@@ -123,8 +128,9 @@ async def add_to_handles(member):
     if member_id in bot.handles[guild_id]:
         bot.handles[guild_id].pop(member_id)
 
-    coro = await add_exp_to_member(member)
-    handle = bot.loop.call_later(60, bot.loop.create_task, coro)
+    #coro = await add_exp_to_member(member)
+    print("this?")
+    handle = bot.loop.call_later(1, bot.loop.create_task, add_exp_to_member(member))
     bot.handles[guild_id][member_id] = handle
 
 #################################################################################
