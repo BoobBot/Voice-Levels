@@ -43,6 +43,10 @@ async def on_ready():
     for guild in [x for x in bot.guilds if x.afk_channel]:
         for voice_channel in [x for x in guild.voice_channels if not x == guild.afk_channel]:
             for member in [x for x in voice_channel.members if not x.bot]:
+                user = await r.table('users').get(str(member.id)).run(bot.conn)
+                if not user:
+                    await r.table('users').insert({"exp": 0, "level": 0, "id": str(member.id)}, conflict="update").run(
+                        bot.conn)
                 await add_to_handles(member)
 
 
@@ -81,12 +85,25 @@ def get_lvl(xp):
     level = math.floor(rank_cont * math.sqrt(xp))
     return level
 
+
 async def add_exp_to_member(member):
     # add back to loop
     if member.voice:
         if member.voice.channel and member.voice.channel is not member.guild.afk_channel:
             await add_to_handles(member)
     # do stuff here
+    user = await r.table('users').get(str(member.id)).run(bot.conn)
+    if not user:
+        await r.table('users').insert({"exp": 0, "level": 0, "id": str(member.id)}, conflict="update").run(
+            bot.conn)
+        user = await r.table('users').get(str(member.id)).run(bot.conn)
+    user["exp"] += 1
+    current_level = math.floor(0.1 * math.sqrt(user["exp"]))
+    if current_level > user['level']:
+        user['level'] = current_level
+        print(member + "RANKED UP")
+    await r.table('users').insert(user, conflict="update").run(bot.conn)
+    print(user)
     print(f"Would be updating exp for {member}")
 
 
