@@ -226,8 +226,11 @@ async def profile(ctx, member: discord.Member = None):
     if not user:
         await new_user(member)
         user = await get_user(member)
-    await ctx.send(
-        f"User: {str(member)}\nLevel: {user['level']}\nExp: {user['exp']}/{get_xp_from_level(user['level'])}")
+    em = discord.Embed()
+    em.set_author(icon_url=member.avatar_url, name="Profile for " + member.name)
+    em.add_field(name="​", value=f"User: {str(member)}\nLevel: {user['level']}\nExp: {user['exp']}/{get_xp_from_level(user['level'])}")
+    em.set_footer(text="Requested by {}".format(str(ctx.message.author)))
+    await ctx.send(embed=em)
 
 
 @bot.command()
@@ -241,12 +244,15 @@ async def levels(ctx):
     c = 0
     for v in sorted(t, key=lambda i: i['exp'], reverse=True):
         c += 1
-        msg += f"```#{c} User: {v['name']}\nLevel: {v['level']}\nExp:{v['exp']}```\n"
+        if c == 1:
+            msg += f":trophy:\n**User**: {v['name']}\n**Level**: {v['level']}\n**Exp**: {v['exp']}\n\n"
+        else:
+            msg += f"#**{c}**\n**User**: {v['name']}\n**Level**: {v['level']}\n**Exp**: {v['exp']}\n\n"
         if c == 5:
             break
-    em = discord.Embed(color=await ctx.guildcolor(str(ctx.guild.id)))
-    em.set_author(icon_url=bot.user.avatar_url, name="Leaderboard  for " + bot.user.name)
-    em.add_field(name="Global leaderboard", value=msg)
+    em = discord.Embed()
+    em.set_author(icon_url=bot.user.avatar_url, name="Leader-board for " + bot.user.name)
+    em.add_field(name="Global leader-board\n", value=msg)
     em.set_footer(text="Requested by {}".format(str(ctx.message.author)))
     await ctx.send(embed=em)
 
