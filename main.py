@@ -12,7 +12,7 @@ with open("config.yml") as config:
     config = yaml.safe_load(config)
 
 description = "Just a bot that grants members exp for being in a voice channel"
-bot = commands.AutoShardedBot(command_prefix="vl!", case_insensitive=True, description=description)
+bot = commands.AutoShardedBot(command_prefix="vl!", case_insensitive=True, description=description,fetch_offline_members = False)
 bot.config = config
 bot.handles = {}
 
@@ -166,6 +166,7 @@ async def add_exp_to_member(member):
         exp = 1
     user["exp"] += exp
     current_level = get_level(user["exp"])
+    user['level'] = current_level
     if current_level > user['level']:
         user['level'] = current_level
         print(str(member) + "RANKED UP")
@@ -231,8 +232,19 @@ async def profile(ctx, member: discord.Member = None):
 
 @bot.command()
 async def levels(ctx):
-    lol = await r.table('guilds').run(bot.conn)
-    pprint(lol)
+    lol = await r.table('guilds').get(str(ctx.guild.id)).get_field("users").run(bot.conn)
+    #pprint(lol)
+    t = []
+    for k, v in lol.items():
+        t.append(v)
+    msg = ""
+    c = 0
+    for v in sorted(t, key=lambda i: i['exp'], reverse=True):
+        c += 1
+        msg += f"```#{c} User: {v['name']}\nLevel: {v['level']}\nExp:{v['exp']}```\n"
+        if c == 5:
+            return await ctx.send(msg)
+
     # msg = ""
     # for value in lol:
     #     lvl = self._get_level_from_xp(value['xp'])
