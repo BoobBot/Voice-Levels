@@ -1,6 +1,7 @@
 import yaml
 from discord.ext import commands
 import rethinkdb as r
+import math
 
 with open("config.yml") as config:
     config = yaml.safe_load(config)
@@ -74,6 +75,11 @@ async def on_guild_join(guild):
 #################################################################################
 #                               FUNCTIONS
 #################################################################################
+
+def get_lvl(xp):
+    rank_cont = 0.1
+    level = math.floor(rank_cont * math.sqrt(xp))
+    return level
 
 async def add_exp_to_member(member):
     # add back to loop
