@@ -120,8 +120,6 @@ async def add_to_handles(member):
     if member_id in bot.handles[guild_id]:
         bot.handles[guild_id].pop(member_id)
 
-    # coro = await add_exp_to_member(member)
-    print("this?")
     handle = bot.loop.call_later(1, bot.loop.create_task, add_exp_to_member(member))
     bot.handles[guild_id][member_id] = handle
 
