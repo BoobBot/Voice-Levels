@@ -101,15 +101,17 @@ def get_xp_from_level(level):
 
 
 async def new_user(member):
+    guild = member.guild
+    guild_id = str(guild.id)
     await r.table('users').insert({"exp": 0, "level": 0, "id": str(member.id)}, conflict="update").run(bot.conn)
 
 
-async def save_user(user_dict):
+async def save_user(user_dict, Guild_id):
     await r.table('users').insert(user_dict, conflict="update").run(bot.conn)
 
 
 async def get_user(member):
-    await r.table('users').get(str(member.id)).run(bot.conn)
+    return await r.table('users').get(str(member.id)).run(bot.conn)
 
 
 async def add_exp_to_member(member):
@@ -126,7 +128,7 @@ async def add_exp_to_member(member):
     if current_level > user['level']:
         user['level'] = current_level
         print(str(member) + "RANKED UP")
-    await save_user(user)
+    await save_user(user, member.guild.id)
     print(f"updating exp for {member}")
     print(user)
 
