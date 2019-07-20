@@ -78,6 +78,43 @@ async def on_guild_join(guild):
 
 
 #################################################################################
+#                               DATABASE FUNCTIONS
+#################################################################################
+async def new_guild(guild_id):
+        await r.table("guilds").insert({
+            "id": str(guild_id),
+            "announce": {
+                "enabled": False,
+                "whisper": False,
+                "message": "%USER% is now voice level: %LEVEL%!"
+            },
+            "rewards": {
+                "keep_old": True,
+                "roles": {}
+            },
+            "users": {}
+        }, conflict="update").run(bot.conn)
+
+
+async def get_guild(guild_id):
+    return r.table("guilds").get(str(guild_id)).run(bot.conn)
+
+
+async def new_user(member):
+    guild = member.guild
+    guild_id = str(guild.id)
+    await r.table('users').insert({"exp": 0, "level": 0, "id": str(member.id)}, conflict="update").run(bot.conn)
+
+
+async def save_user(user_dict, guild_id):
+    await r.table('users').insert(user_dict, conflict="update").run(bot.conn)
+
+
+async def get_user(member):
+    return await r.table('users').get(str(member.id)).run(bot.conn)
+
+
+#################################################################################
 #                               FUNCTIONS
 #################################################################################
 
@@ -98,20 +135,6 @@ def get_level(xp):
 
 def get_xp_from_level(level):
     return pow(level+1 * 10, 2)
-
-
-async def new_user(member):
-    guild = member.guild
-    guild_id = str(guild.id)
-    await r.table('users').insert({"exp": 0, "level": 0, "id": str(member.id)}, conflict="update").run(bot.conn)
-
-
-async def save_user(user_dict, guild_id):
-    await r.table('users').insert(user_dict, conflict="update").run(bot.conn)
-
-
-async def get_user(member):
-    return await r.table('users').get(str(member.id)).run(bot.conn)
 
 
 async def add_exp_to_member(member):
