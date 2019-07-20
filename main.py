@@ -170,6 +170,7 @@ async def add_exp_to_member(member):
         user['level'] = current_level
         print(str(member) + "RANKED UP")
     user["name"] = str(member)
+    user["id"] = str(member.id)
     await save_user(user, member.guild.id)
     print(f"updating exp for {member}")
     print(user)
