@@ -98,7 +98,7 @@ async def new_user(member):
 
 async def add_exp_to_member(member):
     # add back to loop
-    if member.voice:
+    if member.voice and not member.voice.mute:
         if member.voice.channel and member.voice.channel is not member.guild.afk_channel:
             await add_to_handles(member)
     # do stuff here
