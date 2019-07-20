@@ -115,6 +115,7 @@ async def new_user(member):
 
 async def save_user(user_dict, guild_id):
     guild = await get_guild(guild_id)
+    guild['users'].append([user_dict['id']])
     guild['users'][user_dict['id']] = user_dict
     await save_guild(guild)
 
@@ -229,7 +230,7 @@ async def profile(ctx, member: discord.Member = None):
 @bot.command()
 async def levels(ctx):
     lol = await r.table('guilds').run(bot.conn)
-    print(lol)
+    pprint(lol)
     # msg = ""
     # for value in lol:
     #     lvl = self._get_level_from_xp(value['xp'])
