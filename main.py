@@ -103,8 +103,8 @@ async def add_exp_to_member(member):
         user['level'] = current_level
         print(str(member) + "RANKED UP")
     await r.table('users').insert(user, conflict="update").run(bot.conn)
+    print(f"updating exp for {member}")
     print(user)
-    print(f"Would be updating exp for {member}")
 
 
 async def add_to_handles(member):
